@@ -125,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences settings = getApplicationContext().getSharedPreferences("myPrefs", 0);
         volInput.setText(settings.getString("volume", "0000"));
         autoApply.setChecked(settings.getBoolean("autoApply", false));
-        quitAfterApply.setChecked(settings.getBoolean("autoApply", false));
+        quitAfterApply.setChecked(settings.getBoolean("quitAfterApply", false));
 
         if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.RECORD_AUDIO)
