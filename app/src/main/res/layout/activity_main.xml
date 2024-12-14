@@ -29,6 +29,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/auto_apply" />
 
+    <Button
+        android:id="@+id/record_permission_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="114dp"
+        android:layout_marginTop="84dp"
+        android:layout_marginEnd="115dp"
+        android:onClick="recordPermissionButtonPressed"
+        android:text="Request record permission"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/auto_apply" />
+
     <EditText
         android:id="@+id/volume"
         android:layout_width="wrap_content"
