@@ -117,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
 
     protected void checkUsbDevices()
     {
-        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), PendingIntent.FLAG_IMMUTABLE);
 
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
 
@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the receiver for getting the device permission
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbReceiver, filter);
+        ContextCompat.registerReceiver(this, usbReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         checkUsbDevices();
     }
