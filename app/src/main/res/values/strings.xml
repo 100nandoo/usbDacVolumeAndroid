@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">usbDacVolumeAndroid</string>
+    <string name="app_name">Apple Dongle Volume Fixer</string>
     <string name="auto_apply_on_start">Auto apply on start</string>
     <string name="quit_app_after_applying_volume">Quit app after applying volume</string>
     <string name="no_usb_device">No USB device</string>
