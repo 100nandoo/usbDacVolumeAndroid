@@ -41,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private UsbManager usbManager;
 
-    private TextView tv;
+    private TextView tvDeviceName;
     private EditText volInput;
 
     private CheckBox autoApply;
@@ -51,6 +51,13 @@ public class MainActivity extends AppCompatActivity {
 
     private int deviceDescriptor = -1;
     private static String deviceName;
+
+    // in Hex 0x5AC is apple vendor id
+    private static final String APPLE_VENDOR_ID = "1452";
+
+    // in Hex 0x110A is apple dongle product id
+    private static final String APPLE_DONGLE_PRODUCT_ID = "4362";
+
 
     private static final String TAG = "USB DAC Volume Adjustment" ;
     private static final String ACTION_USB_PERMISSION =
@@ -65,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
                     UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        if(device != null){
+                        if(device != null && isAppleDongle(device)){
                             connectDevice(device);
                         }
                     }
@@ -77,8 +84,20 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    private boolean isAppleDongle(UsbDevice device){
+        return device.getVendorId() == Integer.parseInt(APPLE_VENDOR_ID) && device.getProductId() == Integer.parseInt(APPLE_DONGLE_PRODUCT_ID);
+    }
+
     protected void connectDevice(UsbDevice device)
     {
+        Log.d("UsbDevice", "device: " + device.getDeviceName() + " " + device.getVendorId() + " " + device.getProductId());
+        boolean isAppleDongle = isAppleDongle(device);
+
+        String vendorId = "0x" + Integer.toHexString(device.getVendorId()).toUpperCase();
+        String productId = "0x" + Integer.toHexString(device.getProductId()).toUpperCase();
+        String deviceVendorIdAndProductId = isAppleDongle ? "Apple Dongle" :
+               "vendorId: " + vendorId + " productId:" + productId;
+        tvDeviceName.setText(deviceVendorIdAndProductId);
         UsbInterface intf = device.getInterface(0);
         UsbEndpoint endpoint = intf.getEndpoint(0);
         UsbDeviceConnection connection = usbManager.openDevice(device);
@@ -88,9 +107,11 @@ public class MainActivity extends AppCompatActivity {
         deviceName = initializeNativeDevice(fileDescriptor);
         deviceDescriptor = fileDescriptor;
 
-        if(autoApply.isChecked() && quitAfterApply.isChecked()){
+        if(autoApply.isChecked()){
             setDeviceVolume(fileDescriptor);
-            finishAndRemoveTask();
+            if(quitAfterApply.isChecked()){
+                finishAndRemoveTask();
+            }
         }
     }
 
@@ -99,7 +120,9 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
 
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
+
         for (UsbDevice device : deviceList.values()) {
+            if(!isAppleDongle(device)) return;
             if(usbManager.hasPermission(device))
             {
                 connectDevice(device);
@@ -116,14 +139,14 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        tv = binding.sampleText;
+        tvDeviceName = binding.deviceName;
         volInput = binding.volume;
         autoApply = binding.autoApply;
         quitAfterApply = binding.quitAfterApply;
         recordPermissionButton = binding.recordPermissionButton;
 
         SharedPreferences settings = getApplicationContext().getSharedPreferences("myPrefs", 0);
-        volInput.setText(settings.getString("volume", "0000"));
+        volInput.setText(settings.getString("volume", "007f"));
         autoApply.setChecked(settings.getBoolean("autoApply", false));
         quitAfterApply.setChecked(settings.getBoolean("quitAfterApply", false));
 
@@ -147,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
         String volume = volInput.getText().toString();
 
         if(deviceDescriptor < 0){
-            tv.setBackgroundColor(Color.RED);
+            tvDeviceName.setBackgroundColor(Color.RED);
             return;
         }
 
