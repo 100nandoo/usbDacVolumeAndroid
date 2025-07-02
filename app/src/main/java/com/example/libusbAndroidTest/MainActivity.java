@@ -1,17 +1,11 @@
 package com.example.libusbAndroidTest;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import android.Manifest;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
@@ -21,11 +15,13 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.example.libusbAndroidTest.databinding.ActivityMainBinding;
 
@@ -46,8 +42,6 @@ public class MainActivity extends AppCompatActivity {
 
     private CheckBox autoApply;
     private CheckBox quitAfterApply;
-
-    private Button recordPermissionButton;
 
     private int deviceDescriptor = -1;
     private static String deviceName;
@@ -72,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        if(device != null && isAppleDongle(device)){
+                        if(device != null){
                             connectDevice(device);
                         }
                     }
@@ -91,11 +85,13 @@ public class MainActivity extends AppCompatActivity {
     protected void connectDevice(UsbDevice device)
     {
         Log.d("UsbDevice", "device: " + device.getDeviceName() + " " + device.getVendorId() + " " + device.getProductId());
+        Log.d("UsbDevice",
+                "class: " + device.getDeviceClass() + " " + device.getDeviceSubclass() + " " + device.getDeviceProtocol());
         boolean isAppleDongle = isAppleDongle(device);
 
         String vendorId = "0x" + Integer.toHexString(device.getVendorId()).toUpperCase();
         String productId = "0x" + Integer.toHexString(device.getProductId()).toUpperCase();
-        String deviceVendorIdAndProductId = isAppleDongle ? "Apple Dongle" :
+        String deviceVendorIdAndProductId = isAppleDongle ? "Apple Dongle Detected!" :
                "vendorId: " + vendorId + " productId:" + productId;
         tvDeviceName.setText(deviceVendorIdAndProductId);
         UsbInterface intf = device.getInterface(0);
@@ -122,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
 
         for (UsbDevice device : deviceList.values()) {
-            if(!isAppleDongle(device)) return;
             if(usbManager.hasPermission(device))
             {
                 connectDevice(device);
@@ -143,18 +138,11 @@ public class MainActivity extends AppCompatActivity {
         volInput = binding.volume;
         autoApply = binding.autoApply;
         quitAfterApply = binding.quitAfterApply;
-        recordPermissionButton = binding.recordPermissionButton;
 
         SharedPreferences settings = getApplicationContext().getSharedPreferences("myPrefs", 0);
         volInput.setText(settings.getString("volume", "007f"));
         autoApply.setChecked(settings.getBoolean("autoApply", false));
         quitAfterApply.setChecked(settings.getBoolean("quitAfterApply", false));
-
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.RECORD_AUDIO)
-                == PackageManager.PERMISSION_GRANTED) {
-                recordPermissionButton.setEnabled(false);
-        }
 
         // Initialize UsbManager
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -230,24 +218,5 @@ public class MainActivity extends AppCompatActivity {
 
         setDeviceVolume(fileDescriptor, hexStringToByteArray(volume));
         Toast.makeText(getApplicationContext(), "Volume set for DAC!", Toast.LENGTH_LONG).show();
-    }
-
-    // Trigger the permission popup
-
-    private final int CALLBACK_PERMISSION = 1;
-    public void recordPermissionButtonPressed(View view) {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, CALLBACK_PERMISSION);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CALLBACK_PERMISSION) {
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    recordPermissionButton.setEnabled(false);
-                return;
-            }
-        }
     }
 }
