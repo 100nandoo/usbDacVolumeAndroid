@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.libusbAndroidTest.databinding.ActivityMainBinding;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "USB DAC Volume Adjustment" ;
     private static final String ACTION_USB_PERMISSION =
             "com.android.example.USB_PERMISSION";
+    private static final int RECORD_AUDIO_PERMISSION_CODE = 1;
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
 
@@ -152,6 +154,29 @@ public class MainActivity extends AppCompatActivity {
         ContextCompat.registerReceiver(this, usbReceiver, filter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         checkUsbDevices();
+
+        requestRecordAudioPermission();
+    }
+
+    private void requestRecordAudioPermission() {
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.RECORD_AUDIO)
+                != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.RECORD_AUDIO},
+                    RECORD_AUDIO_PERMISSION_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == RECORD_AUDIO_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                Log.d(TAG, "RECORD_AUDIO permission granted");
+            } else {
+                Log.d(TAG, "RECORD_AUDIO permission denied");
+            }
+        }
     }
 
     public void applyButtonPressed(View view){

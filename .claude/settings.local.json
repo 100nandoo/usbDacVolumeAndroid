@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew -h)",
+      "Bash(chmod +x ./gradlew)",
+      "Bash(./gradlew tasks *)",
+      "Bash(./gradlew assembleDebug)",
+      "Bash(./gradlew clean *)",
+      "Bash(./gradlew assembleRelease)",
+      "Bash(awk '{print $NF}')"
+    ]
+  }
+}

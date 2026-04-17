@@ -9,7 +9,6 @@ cmake_minimum_required(VERSION 3.10.2)
 
 project("libusbAndroidTest")
 
-
 ######         libusb         ######
 set(LIBUSB_DIR ${CMAKE_SOURCE_DIR}/libusb)
 set(LIBUSB_SOURCES ${LIBUSB_DIR}/libusb/core.c

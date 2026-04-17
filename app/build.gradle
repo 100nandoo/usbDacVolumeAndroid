@@ -4,6 +4,7 @@ plugins {
 
 android {
     compileSdk 36
+    ndkVersion "28.2.13676358"
 
     defaultConfig {
         applicationId 'com.example.libusbAndroidTest'
@@ -16,6 +17,7 @@ android {
         externalNativeBuild {
             cmake {
                 cppFlags '-std=c++17'
+                arguments '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON', '-DCMAKE_ANDROID_NATIVE_SUPPORT_FLEXIBLE_PAGE_SIZES=ON'
             }
         }
     }
@@ -41,6 +43,11 @@ android {
         viewBinding true
     }
     namespace 'com.example.libusbAndroidTest'
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging = false
+        }
+    }
 }
 
 dependencies {
